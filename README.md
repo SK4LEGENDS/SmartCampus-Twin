@@ -60,16 +60,16 @@ Hourly operational data is stored in the local SQLite database. Below is the com
 
 ### A. Net Grid Demand
 Net grid load represents the actual power drawn from the external utility company. It subtracts self-generated solar energy from the campus gross consumption:
-$$\text{Net\_Grid\_Usage (kWh)} = \text{Electricity\_Consumption\_kWh} - \text{Solar\_Generation\_kWh}$$
+$$\text{Net Grid Usage (kWh)} = \text{Electricity Consumption (kWh)} - \text{Solar Generation (kWh)}$$
 
 ### B. Greenhouse Gas Carbon Footprint
 The campus carbon footprint is calculated by applying a regional grid emission factor of $0.82\text{ kg CO}_2\text{ per kWh}$ drawn from the utility:
-$$\text{CO}_2\text{ (tons)} = \frac{\text{Net\_Grid\_Usage (kWh)} \times 0.82}{1000}$$
+$$\text{CO}_2\text{ (tons)} = \frac{\text{Net Grid Usage (kWh)} \times 0.82}{1000}$$
 *Here, dividing by 1,000 converts the emission weight from kilograms to metric tons.*
 
 ### C. Solar Offset Percentage
 Calculates the proportion of gross campus energy demand offset by clean, renewable solar power:
-$$\text{Solar Offset (\%)} = \left( \frac{\sum \text{Solar\_Generation\_kWh}}{\sum \text{Electricity\_Consumption\_kWh}} \right) \times 100$$
+$$\text{Solar Offset (\%)} = \left( \frac{\sum \text{Solar Generation (kWh)}}{\sum \text{Electricity Consumption (kWh)}} \right) \times 100$$
 
 ### D. Model Evaluation Metrics
 Regression models are validated using Mean Squared Error (MSE) and $R^2$ (Coefficient of Determination):
@@ -83,7 +83,7 @@ $$R^2 = 1 - \frac{\sum (y_i - \hat{y}_i)^2}{\sum (y_i - \bar{y})^2}$$
 
 ### E. Feature Dimensionality Reduction
 To prevent overfitting on the high-dimensional classroom headcount inputs, individual blocks are aggregated into a single operational vector:
-$$\text{Total\_Students} = \sum_{k=1}^{5} \text{AB}_k + \sum_{m=1}^{4} \text{MAB}_m$$
+$$\text{Total Students} = \sum_{k=1}^{5} \text{AB}_k + \sum_{m=1}^{4} \text{MAB}_m$$
 
 ---
 
