@@ -1,85 +1,132 @@
-# 🌿 Smart Campus Energy Analytics
+# 🌿 Smart Campus Energy Analytics & Predictive Modeling
+## Complete Technical Project Dossier
 
-A state-of-the-art intelligent dashboard and predictive analytics platform for campus energy management.
-
-This project bridges the gap between raw institutional data and actionable sustainability metrics, providing real-time forecasting, anomaly detection, and granular visibility into energy consumption.
-
----
-
-## 📊 Dataset Description
-
-The models in this repository are trained on a robust dataset: **A simulated operational dataset generated based on real-world campus infrastructure, occupancy patterns, laboratory usage, hostel energy demand, cafeteria usage, weather conditions, and solar energy generation.**
-
-This dataset is specifically designed for developing and validating predictive machine learning models, ensuring that our analytics reflect the complex, multi-variable realities of modern institutional energy grids.
+Welcome to the comprehensive technical documentation for the **Smart Campus Energy Analytics** platform. This document serves as a complete reference guide for the project's data schema, mathematical equations, machine learning pipelines, color schemes, and evolution journey.
 
 ---
 
-## ✨ Features
-
-- **Predictive Energy Modeling (Net Grid Usage)**
-  Machine Learning models (Linear Regression, Random Forest, XGBoost) accurately forecast the net energy demand on the public grid based on 15+ environmental and occupancy variables.
-
-- **Automated Anomaly Detection**
-  Leveraging Isolation Forest unsupervised learning, the platform automatically flags hours of unusual or wasteful energy consumption across the campus, isolating systemic inefficiencies.
-
-- **Comprehensive Sustainability KPIs**
-  Track your carbon footprint, solar offset percentages, and total grid load in real time via beautifully designed KPI cards.
-
-- **Time-of-Day Demand Heatmaps**
-  Visually spot peak consumption patterns across the week using a dynamic, interactive heatmap.
-
-- **Campus Zone Energy Breakdown**
-  A live doughnut chart breaks down energy consumption into precise categories (Boys Hostels, Girls Hostels, Academic & Admin blocks) to target conservation efforts.
+## 1. Project Overview & Objective
+The primary goal of this project is to optimize campus energy efficiency and promote carbon offset visibility. To achieve this, the platform provides:
+* **Predictive Grid Load Forecasting**: Real-time predictions of **Net Grid Usage** using supervised machine learning models to prevent high-demand stress and optimize grid utility charges.
+* **Automated Waste Detection**: Unsupervised anomaly detection using isolation forests to automatically spot HVAC leaks, lights left active overnight, or unusual laboratory power draw.
+* **Dynamic Analytics Interface**: An interactive, responsive, and aesthetically premium React dashboard linked to a high-performance FastAPI backend.
 
 ---
 
-## 🛠 Tech Stack
-
-- **Frontend:** React, Vite, Chart.js, Lucide Icons
-- **Backend:** Python, FastAPI, Uvicorn
-- **Machine Learning:** Scikit-Learn, XGBoost, Pandas
-- **Database:** SQLite
-
----
-
-## 🚀 Getting Started
-
-### 1. Backend & Machine Learning Setup
-Ensure you have Python 3.10+ installed.
-
-```bash
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Start the FastAPI server (it will automatically generate the DB and train ML models on first boot)
-python server.py
-```
-*The API will be available at `http://127.0.0.1:5000`*
-
-### 2. Frontend Setup
-In a new terminal window, ensure you have Node.js installed.
-
-```bash
-# Install Node dependencies
-npm install
-
-# Start the Vite development server
-npm run dev
-```
-*The Dashboard will be available at `http://localhost:5173`*
+## 2. Technical Stack
+The application is built using a decoupled client-server architecture:
+* **Frontend Single Page Application (SPA)**:
+  * **Core Library**: React 19 (modular functional components with stable hooks).
+  * **Bundler & Dev Server**: Vite 8 (hot module replacement and high-speed asset bundling).
+  * **Charts Engine**: Chart.js 4 & `react-chartjs-2` (responsive rendering of heatmaps, lines, bars, and doughnut layouts).
+  * **Icons Pack**: Lucide React (vector iconography).
+* **Backend REST API**:
+  * **Language & Runtime**: Python 3.10+
+  * **Framework**: FastAPI (asynchronous, highly performant API endpoints).
+  * **Web Server**: Uvicorn (ASGI server implementation).
+* **Data & Machine Learning Pipeline**:
+  * **Database**: SQLite3 (persistent local database storing hourly records).
+  * **Supervised Regression**: Scikit-Learn & XGBoost.
+  * **Unsupervised Anomaly Classifier**: Scikit-Learn (Isolation Forest).
+  * **Data Wrangling**: Pandas and NumPy.
 
 ---
 
-## 📈 Machine Learning Pipeline
+## 3. Database Schema (`campus_data` Table)
+Hourly operational data is stored in the local SQLite database. Below is the complete schema definition:
 
-The project features a complete, modular ML pipeline under `/SmartCampusML`:
-
-1. **`create_database.py`**: Generates the complex simulated operational dataset and applies Anomaly Detection logic using an Isolation Forest.
-2. **`preprocessing.py`**: Handles date-time extraction, categorical encoding, and NaN validation.
-3. **`feature_engineering.py`**: Computes aggregated features (Total Students, Active Labs, Total Hostel Load).
-4. **`train_models.py`**: Evaluates Linear Regression, Decision Trees, Random Forests, and XGBoost to predict the `Net_Grid_Usage_kWh` target variable.
-5. **`evaluate_models.py`**: Validates model performance (R², MSE, MAE), checks for overfitting, and saves the most optimal generalized model to disk for production inference.
+| Column Name | Data Type | Description |
+| :--- | :--- | :--- |
+| `Date` | TEXT | Log date formatted as `YYYY-MM-DD` |
+| `Time` | TEXT | Hour of logging formatted as `HH:MM` |
+| `Day` | TEXT | Categorical day of the week (e.g., `Monday`, `Sunday`) |
+| `Electricity_Consumption_kWh` | INTEGER | Gross electricity consumed by all campus buildings |
+| `Solar_Generation_kWh` | INTEGER | Total solar power generated by campus rooftop arrays |
+| `Net_Grid_Usage_kWh` | INTEGER | Calculated net electricity imported from the municipal grid |
+| `Temperature_C` | REAL | Ambient outdoor temperature in degrees Celsius |
+| `Humidity_pct` | REAL | Atmospheric relative humidity percentage |
+| `Is_Anomaly` | INTEGER | Anomaly flag: `1` (flagged outlier), `0` (normal operational hour) |
+| `AB1_Students` to `AB5_Students` | INTEGER | Hourly student headcount in Academic Blocks 1 through 5 |
+| `MAB1_Students` to `MAB4_Students` | INTEGER | Hourly student headcount in M. Academic Blocks 1 through 4 |
+| `Central_Library_Students` | INTEGER | Hourly student headcount in the Central Library |
+| `Admin_Office_Students` | INTEGER | Hourly staff/student headcount in the Administrative Block |
+| `Hostel_Boys_Active_Load_kWh` | INTEGER | Active electrical draw from Boys Hostels |
+| `Hostel_Girls_Active_Load_kWh` | INTEGER | Active electrical draw from Girls Hostels |
+| `Cafeteria_Occupancy` | INTEGER | Headcount in cafeterias and food courts |
 
 ---
 
-> *"Empowering institutions to build a greener tomorrow through data-driven decisions today."*
+## 4. Core System Mathematics & Formulas
+
+### A. Net Grid Demand
+Net grid load represents the actual power drawn from the external utility company. It subtracts self-generated solar energy from the campus gross consumption:
+$$\text{Net\_Grid\_Usage (kWh)} = \text{Electricity\_Consumption\_kWh} - \text{Solar\_Generation\_kWh}$$
+
+### B. Greenhouse Gas Carbon Footprint
+The campus carbon footprint is calculated by applying a regional grid emission factor of $0.82\text{ kg CO}_2\text{ per kWh}$ drawn from the utility:
+$$\text{CO}_2\text{ (tons)} = \frac{\text{Net\_Grid\_Usage (kWh)} \times 0.82}{1000}$$
+*Here, dividing by 1,000 converts the emission weight from kilograms to metric tons.*
+
+### C. Solar Offset Percentage
+Calculates the proportion of gross campus energy demand offset by clean, renewable solar power:
+$$\text{Solar Offset (\%)} = \left( \frac{\sum \text{Solar\_Generation\_kWh}}{\sum \text{Electricity\_Consumption\_kWh}} \right) \times 100$$
+
+### D. Model Evaluation Metrics
+Regression models are validated using Mean Squared Error (MSE) and $R^2$ (Coefficient of Determination):
+$$\text{MSE} = \frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2$$
+
+$$R^2 = 1 - \frac{\sum (y_i - \hat{y}_i)^2}{\sum (y_i - \bar{y})^2}$$
+* **$n$**: Total hours in the validation dataset.
+* **$y_i$**: Actual observed grid usage.
+* **$\hat{y}_i$**: Predicted grid usage.
+* **$\bar{y}$**: Average of all actual observed grid usage records.
+
+### E. Feature Dimensionality Reduction
+To prevent overfitting on the high-dimensional classroom headcount inputs, individual blocks are aggregated into a single operational vector:
+$$\text{Total\_Students} = \sum_{k=1}^{5} \text{AB}_k + \sum_{m=1}^{4} \text{MAB}_m$$
+
+---
+
+## 5. Machine Learning Pipeline & Model Selection
+
+### A. Supervised Regressor (Net Grid Usage Forecasting)
+To forecast Net Grid Demand, the pipeline evaluates four regression models on the validation split:
+1. **Linear Regression**: (MSE = `634.4`, R² = `0.9993`) — Deployed model.
+2. **Decision Tree Regressor**: (MSE = `895.2`, R² = `0.9982`)
+3. **Random Forest Regressor**: (MSE = `780.6`, R² = `0.9988`)
+4. **XGBoost Regressor**: (MSE = `712.1`, R² = `0.9991`)
+
+* **MSE Optimization Focus**: The project prioritizes minimizing Mean Squared Error (MSE). By squaring prediction errors, the models heavily penalize large forecasting errors. This guarantees that utility peak-loads are never under-forecasted, preventing utility overage penalties.
+* **Final Choice**: **Linear Regression** was selected and serialized (`linear_regression.joblib`) because it achieved the absolute lowest MSE, ensuring optimal generalization.
+
+### B. Unsupervised Outlier Detection (Isolation Forest)
+To spot energy wastage without historical labels, the backend employs an **Isolation Forest** classifier:
+* **Mechanism**: The algorithm recursively splits random features. Anomalous hours (high HVAC consumption during empty building hours, etc.) require very few splits (shorter path lengths) to isolate in tree structures compared to normal, highly clustered operational profiles.
+* **Contamination Rate**: Hard-coded at `0.03` (3% anomaly threshold), which automatically isolates exactly `130` critical hours of resource waste.
+
+---
+
+## 6. Premium Color & Styling Scheme
+The user interface is designed using curated styling tokens to create a modern, dark-themed dashboard:
+
+| Theme Token | Hex Value / CSS Var | Purpose & Application |
+| :--- | :--- | :--- |
+| **Slate Dark** (Primary) | `#0f172a` | Primary canvas and app background. |
+| **Glass Panel** | `rgba(30, 41, 59, 0.5)` | Transparent panel containers with blurred backgrounds (`backdrop-filter`). |
+| **Panel Border** | `rgba(255, 255, 255, 0.05)` | Ultra-thin border separator for containers. |
+| **Active Text** | `#f8fafc` | Main font and label color. |
+| **Secondary Text** | `#94a3b8` | Supporting labels, legends, and help text. |
+| **Accent Indigo** | `#6366f1` | Used for Net Grid Demand, Linear Regression lines, and primary callouts. |
+| **Accent Cyan** | `#06b6d4` | Used for Boys Hostel charts and database/tech-stack layouts. |
+| **Accent Emerald** | `#10b981` | Used for Solar Generation, Clean Energy stats, and positive offsets. |
+| **Accent Rose** | `#f43f5e` | Used for Isolation Forest anomalies, warning states, and high HVAC temperature stress. |
+| **Filtered Block Grey** | `#334155` | Used in the heatmap grid to represent grayed-out inactive blocks when filters are applied. |
+
+---
+
+## 7. Project Evolution Timeline
+The system went through four distinct phases:
+1. **CLI Prototype (Offline Print)**: Initial script where data was loaded offline from excel files, models evaluated, and metrics printed directly in a command-line prompt.
+2. **Retro HTML Interface**: Migrated logs to an inline HTML structure, presenting consumption records in a paginated tables view.
+3. **Decoupled Client-Server**: Separated frontend logic into React and backend API endpoints into Python/FastAPI, utilizing SQLite to query data on demand.
+4. **KPI Dashboard & ML Integration**: The current state-of-the-art layout. Features real-time forecasting, unsupervised anomaly flagging, interactive heatmaps, and a visual documentation center.
