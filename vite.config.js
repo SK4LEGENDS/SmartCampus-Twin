@@ -8,9 +8,21 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://127.0.0.1:5000',
         changeOrigin: true,
         secure: false,
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, res) => {
+            if (err.code === 'ECONNREFUSED') {
+              res.writeHead(503, {
+                'Content-Type': 'text/plain',
+              });
+              res.end('Backend server is booting up. Please wait...');
+              return;
+            }
+            console.error('Proxy error:', err);
+          });
+        }
       }
     }
   }
