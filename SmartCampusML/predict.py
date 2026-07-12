@@ -68,6 +68,63 @@ def parse_input_and_predict(inputs_dict):
     pred = model.predict(X)[0]
     return pred
 
+def predict_anomaly(inputs_dict):
+    """Processes dictionary inputs, performs feature engineering, and predicts anomaly state using Logistic Regression."""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    models_dir = os.path.join(base_dir, "models")
+
+    clf_path = os.path.join(models_dir, "anomaly_classifier.joblib")
+    encoder_path = os.path.join(models_dir, "label_encoder.joblib")
+    features_path = os.path.join(models_dir, "feature_names.joblib")
+
+    if not os.path.exists(clf_path):
+        raise FileNotFoundError(f"Anomaly classifier model not found at {clf_path}. Run train_models.py first.")
+    if not os.path.exists(encoder_path):
+        raise FileNotFoundError(f"Label encoder not found at {encoder_path}. Run preprocessing.py first.")
+    if not os.path.exists(features_path):
+        raise FileNotFoundError(f"Feature names file not found at {features_path}. Run train_models.py first.")
+
+    clf = joblib.load(clf_path)
+    label_encoder = joblib.load(encoder_path)
+    feature_names = joblib.load(features_path)
+
+    # Create base DataFrame
+    df = pd.DataFrame([inputs_dict])
+
+    # 1. Parse Date and Time Features
+    date_str = inputs_dict.get("Date", datetime.now().strftime("%Y-%m-%d"))
+    time_str = inputs_dict.get("Time", datetime.now().strftime("%H:%M"))
+    day_str = inputs_dict.get("Day", datetime.now().strftime("%A"))
+
+    date_series = pd.to_datetime(date_str)
+    df["Year"] = date_series.year
+    df["Month"] = date_series.month
+    df["Day_Of_Month"] = date_series.day
+    df["Hour"] = pd.to_datetime(time_str, format="%H:%M").hour
+
+    # Encode Day using loaded encoder
+    try:
+        df["Day_Encoded"] = label_encoder.transform([day_str])[0]
+    except ValueError:
+        df["Day_Encoded"] = 0
+
+    # 2. Feature Engineering
+    ab_cols = ["AB1_Students", "AB2_Students", "AB3_Students", "AB4_Students", "AB5_Students"]
+    mab_cols = ["MAB1_Students", "MAB2_Students", "MAB3_Students", "MAB4_Students"]
+
+    df["Total_AB_Students"] = df[ab_cols].sum(axis=1)
+    df["Total_MAB_Students"] = df[mab_cols].sum(axis=1)
+    df["Total_Students"] = df["Total_AB_Students"] + df["Total_MAB_Students"]
+    df["Total_Hostel_Load"] = df["Boys_Hostel_Load_kWh"] + df["Girls_Hostel_Load_kWh"]
+    df["Total_Active_Labs"] = df["Active_Windows_Labs"] + df["Active_Mac_Labs"]
+
+    # Align columns in exactly the same order as model training
+    X = df[feature_names]
+
+    # Predict
+    pred = clf.predict(X)[0]
+    return int(pred)
+
 def get_interactive_inputs():
     """Gathers user input from command line interactively."""
     print("=" * 60)

@@ -186,5 +186,44 @@ def predict(payload: PredictionInput):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Inference error: {str(e)}")
 
+@app.post("/api/predict_anomaly")
+def predict_anomaly_endpoint(payload: PredictionInput):
+    """Processes frontend operational input and returns the predicted anomaly state (0 or 1)."""
+    try:
+        from predict import predict_anomaly
+        
+        # Format variables back to expected names in prediction model
+        inputs_dict = {
+            "Temperature_C": payload.Temperature_C,
+            "Humidity_%": payload.Humidity_Percent,  # Correct map to Humidity_%
+            "AB1_Students": payload.AB1_Students,
+            "AB2_Students": payload.AB2_Students,
+            "AB3_Students": payload.AB3_Students,
+            "AB4_Students": payload.AB4_Students,
+            "AB5_Students": payload.AB5_Students,
+            "MAB1_Students": payload.MAB1_Students,
+            "MAB2_Students": payload.MAB2_Students,
+            "MAB3_Students": payload.MAB3_Students,
+            "MAB4_Students": payload.MAB4_Students,
+            "Active_Windows_Labs": payload.Active_Windows_Labs,
+            "Active_Mac_Labs": payload.Active_Mac_Labs,
+            "Central_Library_Occupancy": payload.Central_Library_Occupancy,
+            "Admin_Office_Staff": payload.Admin_Office_Staff,
+            "Glass_Cafeteria_Occupancy": payload.Glass_Cafeteria_Occupancy,
+            "Open_Cafeteria_Occupancy": payload.Open_Cafeteria_Occupancy,
+            "Auditorium_Active": payload.Auditorium_Active,
+            "Boys_Hostel_Load_kWh": payload.Boys_Hostel_Load_kWh,
+            "Girls_Hostel_Load_kWh": payload.Girls_Hostel_Load_kWh,
+            "Solar_Generation_kWh": payload.Solar_Generation_kWh,
+            "Date": payload.Date or datetime.now().strftime("%Y-%m-%d"),
+            "Time": payload.Time or datetime.now().strftime("%H:%M"),
+            "Day": payload.Day or datetime.now().strftime("%A"),
+        }
+
+        is_anomaly = predict_anomaly(inputs_dict)
+        return {"is_anomaly": int(is_anomaly)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Anomaly classification error: {str(e)}")
+
 if __name__ == "__main__":
     uvicorn.run("server:app", host="127.0.0.1", port=5000, reload=True)

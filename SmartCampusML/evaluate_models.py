@@ -1,9 +1,11 @@
 import os
 import pandas as pd
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, accuracy_score, precision_score, recall_score, f1_score
 import joblib
 import shutil
 from utils import setup_logging, print_banner
@@ -32,11 +34,16 @@ class ModelEvaluator:
         self.X_train = pd.read_csv(os.path.join(self.processed_data_dir, "X_train.csv"))
         self.y_train = pd.read_csv(os.path.join(self.processed_data_dir, "y_train.csv")).values.flatten()
         
-        model_files = [f for f in os.listdir(self.models_dir) if f.endswith(".joblib") and f not in ["best_model.joblib", "label_encoder.joblib", "feature_names.joblib"]]
+        model_files = [f for f in os.listdir(self.models_dir) if f.endswith(".joblib") and f not in ["best_model.joblib", "label_encoder.joblib", "feature_names.joblib", "anomaly_classifier.joblib"]]
         for f in model_files:
             name = os.path.splitext(f)[0]
             model_path = os.path.join(self.models_dir, f)
             self.models[name] = joblib.load(model_path)
+            
+        # Load Anomaly Classification split and model
+        self.X_test_anomaly = pd.read_csv(os.path.join(self.processed_data_dir, "X_test_anomaly.csv"))
+        self.y_test_anomaly = pd.read_csv(os.path.join(self.processed_data_dir, "y_test_anomaly.csv")).values.flatten()
+        self.anomaly_clf = joblib.load(os.path.join(self.models_dir, "anomaly_classifier.joblib"))
 
     def evaluate_models(self):
         """Evaluates all loaded models and records performance metrics on both splits to check for overfitting."""
@@ -96,6 +103,31 @@ class ModelEvaluator:
         logger.info(f"Test MAE: {best_row['MAE']:.2f}")
         logger.info(f"Overfitting Detected: {best_row['Overfitting_Detected']}")
         logger.info("Generalization check: Chosen model generalizes well to unseen test data.")
+
+        # Evaluate Logistic Regression Anomaly Classifier
+        print_banner("Logistic Regression Anomaly Classifier Evaluation")
+        anomaly_preds = self.anomaly_clf.predict(self.X_test_anomaly)
+        acc = accuracy_score(self.y_test_anomaly, anomaly_preds)
+        prec = precision_score(self.y_test_anomaly, anomaly_preds, zero_division=0)
+        rec = recall_score(self.y_test_anomaly, anomaly_preds, zero_division=0)
+        f1 = f1_score(self.y_test_anomaly, anomaly_preds, zero_division=0)
+
+        logger.info(f"Accuracy : {acc:.5f}")
+        logger.info(f"Precision: {prec:.5f}")
+        logger.info(f"Recall   : {rec:.5f}")
+        logger.info(f"F1-Score : {f1:.5f}")
+
+        # Save classification report
+        clf_report_df = pd.DataFrame([{
+            "Classifier": "Logistic Regression Anomaly Classifier",
+            "Accuracy": acc,
+            "Precision": prec,
+            "Recall": rec,
+            "F1_Score": f1
+        }])
+        clf_report_path = os.path.join(self.outputs_dir, "reports", "anomaly_classification_report.csv")
+        clf_report_df.to_csv(clf_report_path, index=False)
+        logger.info(f"Anomaly classification report saved to {clf_report_path}")
 
     def save_best_model(self):
         """Saves/copies the best model as best_model.joblib."""

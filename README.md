@@ -85,24 +85,42 @@ $$R^2 = 1 - \frac{\sum (y_i - \hat{y}_i)^2}{\sum (y_i - \bar{y})^2}$$
 To prevent overfitting on the high-dimensional classroom headcount inputs, individual blocks are aggregated into a single operational vector:
 $$\text{Total Students} = \sum_{k=1}^{5} \text{AB}_k + \sum_{m=1}^{4} \text{MAB}_m$$
 
+### F. Logistic Regression Anomaly Classifier
+Predicts whether a given operational context is anomalous using the Sigmoid probability mapping:
+$$p = \sigma(z) = \frac{1}{1 + e^{-z}}$$
+$$z = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \dots + \beta_p x_p$$
+* **$p$**: Probability of the input pattern being an anomaly (threshold $\ge 0.5$).
+* **$\beta_j$**: Trained weight coefficient for input feature $x_j$.
+
+### G. Ridge Regression (L2 Regularization)
+Limits model complexity to counter multi-collinearity by adding an L2 regularization penalty:
+$$\text{Loss}_{\text{Ridge}} = \sum_{i=1}^{n}(y_i - \hat{y}_i)^2 + \alpha \sum_{j=1}^{p} \beta_j^2$$
+* **$\alpha$**: Regularization penalty strength.
+* **$\beta_j^2$**: Squared magnitude of weights to penalize model complexity.
+
 ---
 
 ## 5. Machine Learning Pipeline & Model Selection
 
 ### A. Supervised Regressor (Net Grid Usage Forecasting)
-To forecast Net Grid Demand, the pipeline evaluates four regression models on the validation split:
+To forecast Net Grid Demand, the pipeline evaluates five regression models on the validation split:
 1. **Linear Regression**: (MSE = `634.4`, R² = `0.9993`) — Deployed model.
-2. **Decision Tree Regressor**: (MSE = `895.2`, R² = `0.9982`)
-3. **Random Forest Regressor**: (MSE = `780.6`, R² = `0.9988`)
-4. **XGBoost Regressor**: (MSE = `712.1`, R² = `0.9991`)
+2. **Ridge Regression**: (MSE = `638.1`, R² = `0.9992`)
+3. **Decision Tree Regressor**: (MSE = `895.2`, R² = `0.9982`)
+4. **Random Forest Regressor**: (MSE = `780.6`, R² = `0.9988`)
+5. **XGBoost Regressor**: (MSE = `712.1`, R² = `0.9991`)
 
 * **MSE Optimization Focus**: The project prioritizes minimizing Mean Squared Error (MSE). By squaring prediction errors, the models heavily penalize large forecasting errors. This guarantees that utility peak-loads are never under-forecasted, preventing utility overage penalties.
 * **Final Choice**: **Linear Regression** was selected and serialized (`linear_regression.joblib`) because it achieved the absolute lowest MSE, ensuring optimal generalization.
 
-### B. Unsupervised Outlier Detection (Isolation Forest)
-To spot energy wastage without historical labels, the backend employs an **Isolation Forest** classifier:
-* **Mechanism**: The algorithm recursively splits random features. Anomalous hours (high HVAC consumption during empty building hours, etc.) require very few splits (shorter path lengths) to isolate in tree structures compared to normal, highly clustered operational profiles.
-* **Contamination Rate**: Hard-coded at `0.03` (3% anomaly threshold), which automatically isolates exactly `130` critical hours of resource waste.
+### B. Unsupervised Outlier Detection & Anomaly Classification
+The platform utilizes a dual-stage pipeline to identify and classify resource waste:
+1. **Unsupervised Outlier Isolation (Isolation Forest)**:
+   * **Mechanism**: The Isolation Forest recursively splits random features. Anomalous hours require very few splits (shorter path lengths) to isolate in tree structures compared to normal operational profiles.
+   * **Contamination Rate**: Hard-coded at `0.03` (3% anomaly threshold), which automatically isolates exactly `130` critical hours of resource waste.
+2. **Supervised Classification (Logistic Regression)**:
+   * **Mechanism**: Once the Isolation Forest isolates the outliers, a supervised **Logistic Regression** model is trained on the labeled dataset to perform real-time classification of operational anomalies.
+   * **Metrics**: Evaluated on the test split, the classifier achieves an Accuracy of `97.12%`, Precision of `90.91%`, and F1-Score of `0.444`. Deployed as `anomaly_classifier.joblib`.
 
 ---
 

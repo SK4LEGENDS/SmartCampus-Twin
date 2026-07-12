@@ -469,7 +469,7 @@ function Documentation({ theme }) {
               <strong>MSE Optimization Focus:</strong> Minimizing Mean Squared Error (MSE) is the core objective of this project. By squaring the differences between predictions and actual values, the training pipeline heavily penalizes large forecasting misses. This is vital for grid planning to avoid power deficits or under-estimating peak loads.
             </div>
             <ul style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: 1.6, paddingLeft: '1.2rem', margin: '8px 0 0 0' }}>
-              <li><strong>Selection Criteria:</strong> The pipeline automatically deploys the model with the lowest validation MSE (currently <strong>Linear Regression</strong> with MSE = <code>634.4</code> and R² = <code>0.9993</code>).</li>
+              <li><strong>Selection Criteria:</strong> The pipeline automatically deploys the model with the lowest validation MSE (currently <strong>Linear Regression</strong> with MSE = <code>634.4</code> and R² = <code>0.9993</code>, compared to Ridge Regression's MSE = <code>638.1</code>).</li>
               <li><strong>Inputs:</strong> Temperature, humidity, day category, active laboratory counts, and student occupancy schedules.</li>
             </ul>
           </div>
@@ -484,6 +484,7 @@ function Documentation({ theme }) {
             </div>
             <ul style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: 1.6, paddingLeft: '1.2rem', margin: '8px 0 0 0' }}>
               <li><strong>Contamination Metric:</strong> Hard-coded at <code>0.03</code> (3% expected anomaly rate), which flags exactly 130 operational hours of high energy leakage.</li>
+              <li><strong>Supervised Classifier:</strong> Once anomalies are isolated, a supervised <strong>Logistic Regression</strong> model is trained to classify new inputs as normal or anomalous (F1-score = <code>0.44</code>, Accuracy = <code>97.1%</code>).</li>
               <li><strong>Detection Vectors:</strong> Evaluates net grid loads alongside hourly temperatures to detect anomalies like active empty buildings or HVAC leaks.</li>
             </ul>
           </div>
@@ -575,6 +576,48 @@ function Documentation({ theme }) {
                   <li><strong>ABₖ:</strong> Occupancy of Academic Block $k$ ($k$ ranges from 1 to 5).</li>
                   <li><strong>MAB_m:</strong> Occupancy of M. Academic Block $m$ ($m$ ranges from 1 to 4).</li>
                   <li><strong>Σ:</strong> Summation operator (sums values over the designated range).</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <hr style={{ border: 'none', borderBottom: '1px dashed var(--panel-border)', margin: '1.5rem 0' }} />
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+            <div>
+              <h5 style={{ margin: '0 0 10px 0', color: 'var(--accent-indigo)' }}>Logistic Regression (Anomaly Classification)</h5>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.5 }}>
+                Predicts whether a given operational context is anomalous using the Logistic Sigmoid activation function:
+              </p>
+              <div style={{ margin: '15px 0', fontSize: '1rem', textAlign: 'center' }}>
+                {"$$p = \\sigma(z) = \\frac{1}{1 + e^{-z}}$$"}
+                {"$$z = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2 + \\dots + \\beta_p x_p$$"}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.01)', padding: '10px', borderRadius: '6px', border: '1px solid var(--panel-border)', marginTop: '10px' }}>
+                <strong style={{ display: 'block', marginBottom: '4px', color: 'var(--text-primary)' }}>Legend:</strong>
+                <ul style={{ paddingLeft: '1.2rem', margin: 0, display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  <li><strong>p:</strong> Probability of the input pattern being an anomaly (if $p \\ge 0.5$, classified as 1).</li>
+                  <li><strong>σ(z):</strong> Sigmoid function that bounds any real value into a range between 0 and 1.</li>
+                  <li><strong>z:</strong> Net log-odds computed as the linear combination of inputs and model weights.</li>
+                  <li><strong>βⱼ:</strong> Trained weight coefficient assigned to the input feature $x_j$.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div>
+              <h5 style={{ margin: '0 0 10px 0', color: 'var(--accent-indigo)' }}>Ridge Regression (L2 Regularization)</h5>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.5 }}>
+                Shrinks regression coefficients toward zero to improve generalization and counter multi-collinearity:
+              </p>
+              <div style={{ margin: '15px 0', fontSize: '1rem', textAlign: 'center' }}>
+                {"$$\\text{Loss}_{\\text{Ridge}} = \\sum_{i=1}^{n}(y_i - \\hat{y}_i)^2 + \\alpha \\sum_{j=1}^{p} \\beta_j^2$$"}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.01)', padding: '10px', borderRadius: '6px', border: '1px solid var(--panel-border)', marginTop: '10px' }}>
+                <strong style={{ display: 'block', marginBottom: '4px', color: 'var(--text-primary)' }}>Legend:</strong>
+                <ul style={{ paddingLeft: '1.2rem', margin: 0, display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  <li><strong>Loss_Ridge:</strong> The combined training cost objective to minimize.</li>
+                  <li><strong>α (Alpha):</strong> Tuning parameter controlling regularization penalty strength.</li>
+                  <li><strong>βⱼ²:</strong> Squared magnitude of weights (shrinks large weights to prevent overfitting).</li>
                 </ul>
               </div>
             </div>

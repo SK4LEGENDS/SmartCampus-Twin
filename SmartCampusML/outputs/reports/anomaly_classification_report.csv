@@ -1,0 +1,2 @@
+Classifier,Accuracy,Precision,Recall,F1_Score
+Logistic Regression Anomaly Classifier,0.9712313003452244,0.9090909090909091,0.29411764705882354,0.4444444444444444

@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, Ridge, LogisticRegression
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 import joblib
@@ -15,8 +15,11 @@ class ModelTrainer:
         self.df = None
         self.X = None
         self.y = None
+        self.y_anomaly = None
         self.X_train, self.X_test = None, None
         self.y_train, self.y_test = None, None
+        self.X_train_anomaly, self.X_test_anomaly = None, None
+        self.y_train_anomaly, self.y_test_anomaly = None, None
         self.feature_names = []
 
     def load_and_split_data(self):
@@ -33,15 +36,25 @@ class ModelTrainer:
         if target_col not in self.df.columns:
             raise KeyError(f"Target column '{target_col}' not found in dataset.")
 
-        # Drop non-numeric identifier columns and the original total electricity (which leaks the answer)
-        drop_cols = ["Date", "Day", "Time", target_col, "Electricity_Consumption_kWh"]
-        self.X = self.df.drop(columns=drop_cols, errors="ignore")
+        # For grid prediction, drop non-numeric columns, target, and Is_Anomaly (to avoid leaking classification states)
+        drop_cols_reg = ["Date", "Day", "Time", target_col, "Electricity_Consumption_kWh", "Is_Anomaly"]
+        self.X = self.df.drop(columns=drop_cols_reg, errors="ignore")
         self.y = self.df[target_col]
         self.feature_names = self.X.columns.tolist()
 
-        # Split: 80% Training, 20% Testing, random_state=42
+        # For anomaly classification, drop non-numeric columns, grid targets, and target Is_Anomaly
+        drop_cols_clf = ["Date", "Day", "Time", target_col, "Electricity_Consumption_kWh", "Is_Anomaly"]
+        X_anomaly = self.df.drop(columns=drop_cols_clf, errors="ignore")
+        self.y_anomaly = self.df["Is_Anomaly"]
+
+        # Split Regressor data: 80% Training, 20% Testing, random_state=42
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
             self.X, self.y, test_size=0.2, random_state=42
+        )
+
+        # Split Classifier data
+        self.X_train_anomaly, self.X_test_anomaly, self.y_train_anomaly, self.y_test_anomaly = train_test_split(
+            X_anomaly, self.y_anomaly, test_size=0.2, random_state=42
         )
 
         # Save split datasets for model evaluation script
@@ -50,6 +63,11 @@ class ModelTrainer:
         self.X_test.to_csv(os.path.join(processed_dir, "X_test.csv"), index=False)
         self.y_train.to_csv(os.path.join(processed_dir, "y_train.csv"), index=False)
         self.y_test.to_csv(os.path.join(processed_dir, "y_test.csv"), index=False)
+        
+        self.X_train_anomaly.to_csv(os.path.join(processed_dir, "X_train_anomaly.csv"), index=False)
+        self.X_test_anomaly.to_csv(os.path.join(processed_dir, "X_test_anomaly.csv"), index=False)
+        self.y_train_anomaly.to_csv(os.path.join(processed_dir, "y_train_anomaly.csv"), index=False)
+        self.y_test_anomaly.to_csv(os.path.join(processed_dir, "y_test_anomaly.csv"), index=False)
         
         # Save feature names list
         feature_names_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "feature_names.joblib")
@@ -65,9 +83,10 @@ class ModelTrainer:
         models_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
         os.makedirs(models_dir, exist_ok=True)
 
-        # Define candidate models with appropriate hyperparameters
+        # Define candidate regressors with appropriate hyperparameters
         models = {
             "linear_regression": LinearRegression(),
+            "ridge_regression": Ridge(alpha=1.0),
             "decision_tree": DecisionTreeRegressor(max_depth=10, min_samples_split=5, random_state=42),
             "random_forest": RandomForestRegressor(n_estimators=100, max_depth=12, random_state=42, n_jobs=-1),
             "gradient_boosting": GradientBoostingRegressor(n_estimators=100, learning_rate=0.1, max_depth=5, random_state=42)
@@ -81,7 +100,7 @@ class ModelTrainer:
         except ImportError:
             logger.warning("XGBoost is not installed on this system. Skipping XGBoost Regressor training.")
 
-        # Train and save each model
+        # Train and save each regressor
         for name, model in models.items():
             logger.info(f"Training {name.replace('_', ' ').title()}...")
             model.fit(self.X_train, self.y_train)
@@ -89,6 +108,14 @@ class ModelTrainer:
             # Save model binary
             model_path = os.path.join(models_dir, f"{name}.joblib")
             joblib.dump(model, model_path)
+
+        # Train and save Logistic Regression for Anomaly Classification
+        logger.info("Training Logistic Regression Anomaly Classifier...")
+        clf = LogisticRegression(max_iter=1000, random_state=42)
+        clf.fit(self.X_train_anomaly, self.y_train_anomaly)
+        clf_path = os.path.join(models_dir, "anomaly_classifier.joblib")
+        joblib.dump(clf, clf_path)
+        logger.info(f"Anomaly classifier saved to {clf_path}")
 
         logger.info("All models trained and saved successfully.")
 

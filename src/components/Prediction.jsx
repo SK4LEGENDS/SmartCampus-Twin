@@ -30,6 +30,7 @@ function Prediction() {
   });
 
   const [prediction, setPrediction] = useState(null);
+  const [anomalyPrediction, setAnomalyPrediction] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -50,7 +51,9 @@ function Prediction() {
     setLoading(true);
     setError(null);
     setPrediction(null);
+    setAnomalyPrediction(null);
     try {
+      // 1. Fetch grid load prediction
       const response = await fetch('/api/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -62,6 +65,17 @@ function Prediction() {
       }
       const data = await response.json();
       setPrediction(data.prediction);
+
+      // 2. Fetch anomaly classification prediction
+      const anomalyResponse = await fetch('/api/predict_anomaly', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      if (anomalyResponse.ok) {
+        const anomalyData = await anomalyResponse.json();
+        setAnomalyPrediction(anomalyData.is_anomaly);
+      }
     } catch (err) {
       console.error(err);
       setError(err.message);
@@ -272,6 +286,19 @@ function Prediction() {
                   </div>
                   <div style={{ width: '100%', height: '6px', background: 'var(--panel-border)', borderRadius: '3px', position: 'relative', overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${loadStatus.pct}%`, background: loadStatus.color, borderRadius: '3px', transition: 'width 0.6s ease' }} />
+                  </div>
+                </div>
+
+                {/* Anomaly Detection Status (Supervised Logistic Regression Classifier output) */}
+                <div style={{ width: '100%', marginTop: '1.5rem', padding: '0.75rem', borderRadius: '8px', border: '1px solid', borderColor: anomalyPrediction === 1 ? 'rgba(244, 63, 94, 0.3)' : 'rgba(16, 185, 129, 0.3)', background: anomalyPrediction === 1 ? 'rgba(244, 63, 94, 0.04)' : 'rgba(16, 185, 129, 0.04)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Activity size={16} style={{ color: anomalyPrediction === 1 ? 'var(--accent-rose)' : 'var(--accent-emerald)', flexShrink: 0 }} />
+                  <div style={{ textAlign: 'left' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', color: anomalyPrediction === 1 ? 'var(--accent-rose)' : 'var(--accent-emerald)' }}>
+                      {anomalyPrediction === 1 ? 'Anomaly Flagged!' : 'Operational Profile: Normal'}
+                    </span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                      {anomalyPrediction === 1 ? 'Logistic Regression classifier flags this input pattern as an operational outlier.' : 'Logistic Regression classifier reports no systemic energy leakage.'}
+                    </span>
                   </div>
                 </div>
                 
