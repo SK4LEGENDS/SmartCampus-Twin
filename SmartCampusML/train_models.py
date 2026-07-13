@@ -37,13 +37,13 @@ class ModelTrainer:
             raise KeyError(f"Target column '{target_col}' not found in dataset.")
 
         # For grid prediction, drop non-numeric columns, target, and Is_Anomaly (to avoid leaking classification states)
-        drop_cols_reg = ["Date", "Day", "Time", target_col, "Electricity_Consumption_kWh", "Is_Anomaly"]
+        drop_cols_reg = ["Date", "Day", "Time", target_col, "Electricity_Consumption_kWh", "Is_Anomaly", "Anomaly_Score"]
         self.X = self.df.drop(columns=drop_cols_reg, errors="ignore")
         self.y = self.df[target_col]
         self.feature_names = self.X.columns.tolist()
 
         # For anomaly classification, drop non-numeric columns, grid targets, and target Is_Anomaly
-        drop_cols_clf = ["Date", "Day", "Time", target_col, "Electricity_Consumption_kWh", "Is_Anomaly"]
+        drop_cols_clf = ["Date", "Day", "Time", target_col, "Electricity_Consumption_kWh", "Is_Anomaly", "Anomaly_Score"]
         X_anomaly = self.df.drop(columns=drop_cols_clf, errors="ignore")
         self.y_anomaly = self.df["Is_Anomaly"]
 
