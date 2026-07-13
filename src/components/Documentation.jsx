@@ -623,6 +623,58 @@ function Documentation({ theme }) {
             </div>
           </div>
         </div>
+
+        {/* ML Diagnostic Plots */}
+        <div style={{ marginTop: '2rem', background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--panel-border)' }}>
+          <h4 style={{ margin: '0 0 0.5rem 0', fontWeight: 600, fontFamily: 'Outfit', color: 'var(--accent-indigo)' }}>
+            Model Diagnostics & Regression Visualizations
+          </h4>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1.5rem', lineHeight: 1.5 }}>
+            The following diagnostic charts are generated in real-time by the Python ML pipeline during training and model evaluation. They plot the regression model fit, error distributions, and residuals on the validation set.
+          </p>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
+            <div style={{ background: 'var(--panel-bg)', padding: '10px', borderRadius: '8px', border: '1px solid var(--panel-border)', textAlign: 'center' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px', color: 'var(--text-primary)' }}>
+                Actual vs. Predicted Consumption
+              </span>
+              <img src="/plots/actual_vs_predicted.png" alt="Actual vs Predicted" style={{ width: '100%', borderRadius: '6px', border: '1px solid var(--panel-border)' }} onError={(e) => e.target.style.display = 'none'} />
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginTop: '6px' }}>
+                Scatter plot mapping actual values against the regression model predictions. The identity line indicates a perfect fit.
+              </span>
+            </div>
+
+            <div style={{ background: 'var(--panel-bg)', padding: '10px', borderRadius: '8px', border: '1px solid var(--panel-border)', textAlign: 'center' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px', color: 'var(--text-primary)' }}>
+                Model Comparison - MSE
+              </span>
+              <img src="/plots/model_comparison_mse.png" alt="Model Comparison MSE" style={{ width: '100%', borderRadius: '6px', border: '1px solid var(--panel-border)' }} onError={(e) => e.target.style.display = 'none'} />
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginTop: '6px' }}>
+                Mean Squared Error (MSE) comparison across all candidate regressor algorithms evaluated.
+              </span>
+            </div>
+
+            <div style={{ background: 'var(--panel-bg)', padding: '10px', borderRadius: '8px', border: '1px solid var(--panel-border)', textAlign: 'center' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px', color: 'var(--text-primary)' }}>
+                Residual Plot
+              </span>
+              <img src="/plots/residual_plot.png" alt="Residual Plot" style={{ width: '100%', borderRadius: '6px', border: '1px solid var(--panel-border)' }} onError={(e) => e.target.style.display = 'none'} />
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginTop: '6px' }}>
+                Checks for heteroscedasticity. Points should be randomly scattered around the center line.
+              </span>
+            </div>
+
+            <div style={{ background: 'var(--panel-bg)', padding: '10px', borderRadius: '8px', border: '1px solid var(--panel-border)', textAlign: 'center' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px', color: 'var(--text-primary)' }}>
+                Prediction Error Profile
+              </span>
+              <img src="/plots/prediction_error_plot.png" alt="Prediction Error Plot" style={{ width: '100%', borderRadius: '6px', border: '1px solid var(--panel-border)' }} onError={(e) => e.target.style.display = 'none'} />
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginTop: '6px' }}>
+                Compares the sorted actual data points with the predicted values to locate regression fitting margins.
+              </span>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* SECTION 4: VISUALIZATIONS GUIDE */}

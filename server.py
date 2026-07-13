@@ -6,6 +6,7 @@ import sqlite3
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from datetime import datetime
 from sklearn.preprocessing import LabelEncoder
@@ -14,6 +15,11 @@ from sklearn.preprocessing import LabelEncoder
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "SmartCampusML"))
 
 app = FastAPI(title="Smart Campus Analytics API")
+
+# Mount static plots generated during model evaluation
+plots_path = os.path.join("SmartCampusML", "outputs", "plots")
+os.makedirs(plots_path, exist_ok=True)
+app.mount("/plots", StaticFiles(directory=plots_path), name="plots")
 
 # Enable CORS
 app.add_middleware(
