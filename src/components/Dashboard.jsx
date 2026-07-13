@@ -1178,7 +1178,7 @@ function Dashboard({ dataset, stats, theme }) {
           </div>
           <div className="chart-body" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
             <img 
-              src="/plots/actual_vs_predicted.png" 
+              src="/api/plots/actual_vs_predicted.png" 
               alt="Actual vs Predicted Scatter Plot" 
               style={{ maxWidth: '100%', maxHeight: '340px', borderRadius: '8px', border: '1px solid var(--panel-border)', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} 
               onError={(e) => {
@@ -1199,7 +1199,7 @@ function Dashboard({ dataset, stats, theme }) {
           </div>
           <div className="chart-body" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
             <img 
-              src="/plots/model_comparison_mse.png" 
+              src="/api/plots/model_comparison_mse.png" 
               alt="Model Comparison MSE Bar Chart" 
               style={{ maxWidth: '100%', maxHeight: '340px', borderRadius: '8px', border: '1px solid var(--panel-border)', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} 
               onError={(e) => {

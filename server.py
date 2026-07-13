@@ -19,7 +19,7 @@ app = FastAPI(title="Smart Campus Analytics API")
 # Mount static plots generated during model evaluation
 plots_path = os.path.join("SmartCampusML", "outputs", "plots")
 os.makedirs(plots_path, exist_ok=True)
-app.mount("/plots", StaticFiles(directory=plots_path), name="plots")
+app.mount("/api/plots", StaticFiles(directory=plots_path), name="plots")
 
 # Enable CORS
 app.add_middleware(

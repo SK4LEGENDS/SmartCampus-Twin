@@ -638,7 +638,7 @@ function Documentation({ theme }) {
               <span style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px', color: 'var(--text-primary)' }}>
                 Actual vs. Predicted Consumption
               </span>
-              <img src="/plots/actual_vs_predicted.png" alt="Actual vs Predicted" style={{ width: '100%', borderRadius: '6px', border: '1px solid var(--panel-border)' }} onError={(e) => e.target.style.display = 'none'} />
+              <img src="/api/plots/actual_vs_predicted.png" alt="Actual vs Predicted" style={{ width: '100%', borderRadius: '6px', border: '1px solid var(--panel-border)' }} onError={(e) => e.target.style.display = 'none'} />
               <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginTop: '6px' }}>
                 Scatter plot mapping actual values against the regression model predictions. The identity line indicates a perfect fit.
               </span>
@@ -648,7 +648,7 @@ function Documentation({ theme }) {
               <span style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px', color: 'var(--text-primary)' }}>
                 Model Comparison - MSE
               </span>
-              <img src="/plots/model_comparison_mse.png" alt="Model Comparison MSE" style={{ width: '100%', borderRadius: '6px', border: '1px solid var(--panel-border)' }} onError={(e) => e.target.style.display = 'none'} />
+              <img src="/api/plots/model_comparison_mse.png" alt="Model Comparison MSE" style={{ width: '100%', borderRadius: '6px', border: '1px solid var(--panel-border)' }} onError={(e) => e.target.style.display = 'none'} />
               <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginTop: '6px' }}>
                 Mean Squared Error (MSE) comparison across all candidate regressor algorithms evaluated.
               </span>
@@ -658,7 +658,7 @@ function Documentation({ theme }) {
               <span style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px', color: 'var(--text-primary)' }}>
                 Residual Plot
               </span>
-              <img src="/plots/residual_plot.png" alt="Residual Plot" style={{ width: '100%', borderRadius: '6px', border: '1px solid var(--panel-border)' }} onError={(e) => e.target.style.display = 'none'} />
+              <img src="/api/plots/residual_plot.png" alt="Residual Plot" style={{ width: '100%', borderRadius: '6px', border: '1px solid var(--panel-border)' }} onError={(e) => e.target.style.display = 'none'} />
               <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginTop: '6px' }}>
                 Checks for heteroscedasticity. Points should be randomly scattered around the center line.
               </span>
@@ -668,7 +668,7 @@ function Documentation({ theme }) {
               <span style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px', color: 'var(--text-primary)' }}>
                 Prediction Error Profile
               </span>
-              <img src="/plots/prediction_error_plot.png" alt="Prediction Error Plot" style={{ width: '100%', borderRadius: '6px', border: '1px solid var(--panel-border)' }} onError={(e) => e.target.style.display = 'none'} />
+              <img src="/api/plots/prediction_error_plot.png" alt="Prediction Error Plot" style={{ width: '100%', borderRadius: '6px', border: '1px solid var(--panel-border)' }} onError={(e) => e.target.style.display = 'none'} />
               <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginTop: '6px' }}>
                 Compares the sorted actual data points with the predicted values to locate regression fitting margins.
               </span>
