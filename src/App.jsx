@@ -10,6 +10,7 @@ function App() {
   const [dataset, setDataset] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState('Preparing models and loading dataset...');
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -18,22 +19,46 @@ function App() {
     setTheme(savedTheme);
     document.documentElement.setAttribute('data-theme', savedTheme);
 
-    // Fetch dataset and stats from FastAPI
+    // Fetch dataset and stats from FastAPI with automatic retries
     async function fetchData() {
+      const maxRetries = 25;
+      const retryDelay = 2000;
+
+      const fetchWithRetry = async (url, typeName, attempt = 1) => {
+        try {
+          const res = await fetch(url);
+          if (res.status === 503) {
+            if (attempt < maxRetries) {
+              setLoadingMessage(`FastAPI backend is training models and starting up... (Attempt ${attempt}/${maxRetries})`);
+              await new Promise(resolve => setTimeout(resolve, retryDelay));
+              return fetchWithRetry(url, typeName, attempt + 1);
+            }
+            throw new Error(`Failed to load ${typeName} (Service Temporarily Unavailable)`);
+          }
+          if (!res.ok) {
+            throw new Error(`Failed to load ${typeName} (Status ${res.status})`);
+          }
+          return await res.json();
+        } catch (err) {
+          if (attempt < maxRetries) {
+            setLoadingMessage(`Connecting to FastAPI backend... (Attempt ${attempt}/${maxRetries})`);
+            await new Promise(resolve => setTimeout(resolve, retryDelay));
+            return fetchWithRetry(url, typeName, attempt + 1);
+          }
+          throw err;
+        }
+      };
+
       try {
         setLoading(true);
         setError(null);
         
         // Fetch stats
-        const statsRes = await fetch('/api/stats');
-        if (!statsRes.ok) throw new Error('Failed to load global statistics');
-        const statsData = await statsRes.json();
+        const statsData = await fetchWithRetry('/api/stats', 'global statistics');
         setStats(statsData);
 
         // Fetch data rows
-        const dataRes = await fetch('/api/data');
-        if (!dataRes.ok) throw new Error('Failed to load dataset records');
-        const dataRows = await dataRes.json();
+        const dataRows = await fetchWithRetry('/api/data', 'dataset records');
         setDataset(dataRows);
 
       } catch (err) {
@@ -99,7 +124,7 @@ function App() {
           <div className="badge badge-blue" style={{ fontSize: '1.25rem', padding: '1rem 2rem' }}>
             Loading Campus Digital Twin...
           </div>
-          <p style={{ color: 'var(--text-secondary)' }}>Preparing models and loading dataset...</p>
+          <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>{loadingMessage}</p>
         </div>
       ) : error ? (
         <div className="doc-section" style={{ borderColor: 'var(--accent-rose)', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
