@@ -1167,6 +1167,53 @@ function Dashboard({ dataset, stats, theme }) {
 
       </section>
 
+      {/* Model Regression Visualizations (Scatter Plot & MSE Comparison) */}
+      <section className="charts-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', marginTop: '1.5rem' }}>
+        
+        {/* Actual vs Predicted Scatter Plot */}
+        <div className="chart-card fade-in-up delay-4">
+          <div className="chart-header">
+            <h2 className="chart-title" style={{ margin: 0 }}>Actual vs. Predicted Consumption</h2>
+            <div className="chart-subtitle" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Selected Regressor Model Diagnostic Fit (Ridge Regression)</div>
+          </div>
+          <div className="chart-body" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+            <img 
+              src="/plots/actual_vs_predicted.png" 
+              alt="Actual vs Predicted Scatter Plot" 
+              style={{ maxWidth: '100%', maxHeight: '340px', borderRadius: '8px', border: '1px solid var(--panel-border)', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} 
+              onError={(e) => {
+                e.target.style.display = 'none';
+              }}
+            />
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', marginTop: '10px', lineHeight: 1.4 }}>
+              The scatter plot maps actual grid usage (kWh) on the X-axis against predictions on the Y-axis. The red line represents the target identity line (ideal fit).
+            </p>
+          </div>
+        </div>
+
+        {/* Model Comparison MSE Chart */}
+        <div className="chart-card fade-in-up delay-4">
+          <div className="chart-header">
+            <h2 className="chart-title" style={{ margin: 0 }}>Model Error Comparison (MSE)</h2>
+            <div className="chart-subtitle" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Comparing Candidate Machine Learning Regressors</div>
+          </div>
+          <div className="chart-body" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+            <img 
+              src="/plots/model_comparison_mse.png" 
+              alt="Model Comparison MSE Bar Chart" 
+              style={{ maxWidth: '100%', maxHeight: '340px', borderRadius: '8px', border: '1px solid var(--panel-border)', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} 
+              onError={(e) => {
+                e.target.style.display = 'none';
+              }}
+            />
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', marginTop: '10px', lineHeight: 1.4 }}>
+              Compares Mean Squared Error (MSE) across the trained candidate regressors. The model with the lowest MSE is automatically selected.
+            </p>
+          </div>
+        </div>
+
+      </section>
+
       {/* Datatable */}
       <section className="data-panel fade-in-up delay-4">
         <div className="table-toolbar" style={{ flexWrap: 'wrap', gap: '1rem' }}>
