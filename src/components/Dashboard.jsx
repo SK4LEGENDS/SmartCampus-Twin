@@ -1171,7 +1171,7 @@ function Dashboard({ dataset, stats, theme }) {
       <section className="charts-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', marginTop: '1.5rem' }}>
         
         {/* Actual vs Predicted Scatter Plot */}
-        <div className="chart-card fade-in-up delay-4">
+        <div className="chart-card fade-in-up delay-4" style={{ height: 'auto', minHeight: '500px' }}>
           <div className="chart-header">
             <h2 className="chart-title" style={{ margin: 0 }}>Actual vs. Predicted Consumption</h2>
             <div className="chart-subtitle" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Selected Regressor Model Diagnostic Fit (Ridge Regression)</div>
@@ -1192,7 +1192,7 @@ function Dashboard({ dataset, stats, theme }) {
         </div>
 
         {/* Model Comparison MSE Chart */}
-        <div className="chart-card fade-in-up delay-4">
+        <div className="chart-card fade-in-up delay-4" style={{ height: 'auto', minHeight: '500px' }}>
           <div className="chart-header">
             <h2 className="chart-title" style={{ margin: 0 }}>Model Error Comparison (MSE)</h2>
             <div className="chart-subtitle" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Comparing Candidate Machine Learning Regressors</div>
